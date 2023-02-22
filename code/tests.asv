@@ -62,7 +62,7 @@ m_y = sum(y) / n;
 m = [m_x, m_y];
 
 t = linspace(0, 2 * pi, N);
-R = min(h, w)/5;
+R = min(h, w)/2;
 poly = [m(1) + R * cos(t'), m(2) + R * sin(t')]; % à modifier !!!
 r = zeros(1, N);
 
@@ -88,9 +88,6 @@ for i = 1:N
 end
 
 % Calcul du descripteur de Fourier
-R = fft(r);
-R_abs = abs(R);
-R_abs_norm = R_abs / R_abs(1);
-fd = R_abs_norm(2:min(M+1, length(R_abs_norm)));
+fd = fftshift(abs(fft(r, M)));
 
 end
