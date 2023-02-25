@@ -51,7 +51,7 @@ end
 
 function [fd, r, m, poly] = compute_fd(img)
 N = 50; % à modifier !!!
-M = 100; % à modifier !!!
+M = 50; % à modifier !!!
 h = size(img, 1);
 w = size(img, 2);
 
@@ -62,35 +62,35 @@ m_y = sum(y) / n;
 m = [m_x, m_y];
 
 t = linspace(0, 2 * pi, N);
-R = min(h, w)/5;
-poly = [m(1) + R * cos(t'), m(2) + R * sin(t')]; % à modifier !!!
+%R = min(h, w) / 2;
+%poly = [m(1) + R * cos(t'), m(2) + R * sin(t')]; % à modifier !!!
+poly = zeros(N,2);
 r = zeros(1, N);
-
+%Pour N valeurs d’un angle t variant de 0 à 2π (le choix de N est laissé à votre appréciation),
+ %calculer l’intersection p(t) entre le contour de l’objet et le rayon partant de m formant un
+ %angle t avec l’axe horizontal de l’image. Soit r(t) la distance euclidienne entre m et p(t).
+ %Nous appellerons profil de la forme la courbe r(t)
 for i = 1:N
-    % Coordonnées du point p(t) sur le rayon d'angle t passant par le barycentre m
-    x = round(m_x + R * cos(t(i)));
-    y = round(m_y + R * sin(t(i)));
+    %Une méthode simple pour calculer les points d’intersection p(t) sans avoir à détecter le contour
+    %de l’objet au préalable est la suivante :
+    %partir du barycentre m,
+    %avancer le long du rayon d’angle t tant que le pixel est blanc.
+    %Le dernier pixel blanc rencontré le long du rayon correspond à p(t)
 
-    % Tant que le pixel est blanc, avancer sur le rayon
-    while x > 0 && y > 0 && x <= w && y <= h && img(y, x) == 1
-        x = round(x + cos(t(i)));
-        y = round(y + sin(t(i)));
+    % calcul de p(t)
+    p = m;
+    while (round(p(1)) > 0 && round(p(1)) <= w && round(p(2)) > 0 && round(p(2)) <= h && img(round(p(2)), round(p(1))) == 1)
+        p = p + [cos(t(i)), sin(t(i))];
     end
+    poly(i, :) = p;
+    r(i) = norm(p - m);
 
-    % Coordonnées du dernier pixel blanc rencontré, qui correspond à p(t)
-    p = [x - cos(t(i)), y - sin(t(i))];
-
-    % Distance euclidienne entre le barycentre m et le point p(t)
-    r(i) = norm(m - p);
-
-    % Recalculer les coordonnées du polygone pour suivre le contour de l'objet
-    poly(i,:) = [x,y];
 end
 
-% Calcul du descripteur de Fourier
-R = fft(r);
-R_abs = abs(R);
-R_abs_norm = R_abs / R_abs(1);
-fd = R_abs_norm(2:min(M+1, length(R_abs_norm)));
+% Calculer la TF R(f) de r(t). Le descripteur de Fourier que nous utiliserons pour calculer les
+  %scores est le vecteur f d formé par les M premiers coefficients du vecteur |R(f)|/|R(0)|. Le
+  %choix de M est également laissé à votre appréciation.
+fd = fft(r);
+fd = abs(fd(1:M)) / abs(fd(1));
 
 end
