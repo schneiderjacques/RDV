@@ -50,8 +50,8 @@ end
 end
 
 function [fd, r, m, poly] = compute_fd(img)
-N = 50; % à modifier !!!
-M = 50; % à modifier !!!
+N = 500; % à modifier !!!
+M = 300; % à modifier !!!
 h = size(img, 1);
 w = size(img, 2);
 
